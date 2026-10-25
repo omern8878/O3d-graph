@@ -1,0 +1,63 @@
+{
+  "name": "@omernach/o3d-graph",
+  "version": "0.1.0",
+  "description": "Zero-allocation 2D/3D force-directed network graph visualization on top of the @omernach/o3d WebAssembly rendering engine.",
+  "license": "MIT",
+  "author": "omernach",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "graph",
+    "network",
+    "force-directed",
+    "barnes-hut",
+    "octree",
+    "webassembly",
+    "wasm",
+    "3d",
+    "visualization",
+    "o3d"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build",
+    "demo": "vite demo",
+    "demo:build": "vite build demo",
+    "demo:typecheck": "tsc -p demo/tsconfig.json"
+  },
+  "peerDependencies": {
+    "@omernach/o3d": "^1.0.1"
+  },
+  "peerDependenciesMeta": {
+    "@omernach/o3d": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@omernach/o3d": "^1.0.1",
+    "@webgpu/types": "^0.1.74",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.21",
+    "vitest": "^2.1.4"
+  }
+}
