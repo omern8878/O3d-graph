@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>o3d-graph demo</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <canvas id="view" aria-label="Interactive 3D network graph of 1,000 people"></canvas>
+
+    <header class="card brand">
+      <div class="brand-row">
+        <div>
+          <h1>o3d-graph</h1>
+          <p class="muted"><span id="count-nodes">–</span> people · <span id="count-edges">–</span> links</p>
+        </div>
+        <span class="badge" id="status">loading…</span>
+      </div>
+      <div class="search">
+        <input id="search" type="search" placeholder="Search people…" autocomplete="off" spellcheck="false" aria-label="Search people" aria-controls="results" />
+        <ul id="results" class="results" role="listbox" hidden></ul>
+      </div>
+    </header>
+
+    <aside class="card inspector" id="inspector" hidden aria-live="polite"></aside>
+
+    <footer class="dock">
+      <div class="card legend" id="legend" aria-label="Teams (click to hide or show)"></div>
+      <div class="card toolbar" role="toolbar" aria-label="View controls">
+        <div class="seg" role="group" aria-label="Dimension">
+          <button id="mode-3d" type="button" aria-pressed="true" title="3D view (3)">3D</button>
+          <button id="mode-2d" type="button" aria-pressed="false" title="2D view (2)">2D</button>
+        </div>
+        <button id="btn-fit" type="button" title="Fit graph to view (F)">Fit</button>
+        <button id="btn-reheat" type="button" title="Re-run the layout (R)">Shake</button>
+        <button id="btn-rotate" type="button" aria-pressed="false" title="Auto-rotate (A)">Rotate</button>
+        <button id="btn-labels" type="button" aria-pressed="true" title="Show labels (L)">Labels</button>
+        <span class="stats muted" id="stats">–</span>
+      </div>
+    </footer>
+
+    <div class="tooltip" id="tooltip" hidden></div>
+    <div class="fatal" id="fatal" hidden></div>
+    <p class="hint muted">Drag nodes · drag background to orbit · shift-drag to pan · scroll to zoom · click to inspect · Esc to clear</p>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>
