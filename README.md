@@ -3,6 +3,8 @@
 Interactive 2D/3D force-directed network graphs on the
 [`@omernach/o3d`](https://www.npmjs.com/package/@omernach/o3d) WebGPU renderer.
 
+**[Live demo →](https://omern8878.github.io/O3d-graph/)** (needs a WebGPU browser)
+
 - **One call to get going:** `createGraphView()` sets up WebGPU, rendering,
   camera controls, labels and click-to-focus.
 - **Barnes-Hut physics:** flat-array quadtree (2D) / octree (3D),
@@ -59,6 +61,8 @@ A 1,000-person mock organisation (10 teams) built on `createGraphView`. It
 covers search (`/`), focus with the rest of the graph dimmed, an inspector,
 labels chosen per frame, hiding teams, 3D ⇄ 2D (`3` / `2`), fit (`F`), shake
 (`R`), auto-rotate (`A`) and toggling labels (`L`).
+
+[Try it online](https://omern8878.github.io/O3d-graph/), or run it locally:
 
 ```sh
 npm install
