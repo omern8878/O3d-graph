@@ -185,7 +185,7 @@ export class LabelLayer {
     } else {
       this.canvas = document.createElement('canvas');
       this.canvas.setAttribute('aria-hidden', 'true');
-      Object.assign(this.canvas.style, { position: 'fixed', pointerEvents: 'none', left: '0px', top: '0px' });
+      Object.assign(this.canvas.style, { position: 'absolute', pointerEvents: 'none', left: '0px', top: '0px' });
       source.canvas.insertAdjacentElement('afterend', this.canvas);
       this.ownsCanvas = true;
     }
@@ -233,28 +233,48 @@ export class LabelLayer {
   // ===========================================================================
 
   private syncCanvas(): void {
-    const rect = this.source.canvas.getBoundingClientRect();
+    const target = this.source.canvas;
     const dpr = Math.min(globalThis.devicePixelRatio || 1, 2);
+    let width: number;
+    let height: number;
     if (this.ownsCanvas) {
+      // In-flow canvas: sit next to it with absolute positioning so the overlay scrolls with it.
+      // Fixed (or detached) canvas: match its viewport rect with fixed positioning.
       const style = this.canvas.style;
-      const left = `${rect.left}px`;
-      const top = `${rect.top}px`;
-      const width = `${rect.width}px`;
-      const height = `${rect.height}px`;
-      if (style.left !== left) style.left = left;
-      if (style.top !== top) style.top = top;
-      if (style.width !== width) style.width = width;
-      if (style.height !== height) style.height = height;
+      let left: number, top: number, position: string;
+      if (target.offsetParent !== null) {
+        position = 'absolute';
+        left = target.offsetLeft;
+        top = target.offsetTop;
+        width = target.offsetWidth;
+        height = target.offsetHeight;
+      } else {
+        const rect = target.getBoundingClientRect();
+        position = 'fixed';
+        left = rect.left;
+        top = rect.top;
+        width = rect.width;
+        height = rect.height;
+      }
+      setStyle(style, 'position', position);
+      setStyle(style, 'left', `${left}px`);
+      setStyle(style, 'top', `${top}px`);
+      setStyle(style, 'width', `${width}px`);
+      setStyle(style, 'height', `${height}px`);
+    } else {
+      const rect = target.getBoundingClientRect();
+      width = rect.width;
+      height = rect.height;
     }
-    const w = Math.max(1, Math.round(rect.width * dpr));
-    const h = Math.max(1, Math.round(rect.height * dpr));
+    const w = Math.max(1, Math.round(width * dpr));
+    const h = Math.max(1, Math.round(height * dpr));
     if (this.canvas.width !== w || this.canvas.height !== h) {
       this.canvas.width = w;
       this.canvas.height = h;
       this.cleared = true; // resizing clears the backing store
     }
-    this.width = rect.width;
-    this.height = rect.height;
+    this.width = width;
+    this.height = height;
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
@@ -593,6 +613,10 @@ class Candidates {
       idx[b + 1] = i;
     }
   }
+}
+
+function setStyle(style: CSSStyleDeclaration, key: 'position' | 'left' | 'top' | 'width' | 'height', value: string): void {
+  if (style[key] !== value) style[key] = value;
 }
 
 function clamp(v: number, lo: number, hi: number): number {

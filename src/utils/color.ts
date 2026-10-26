@@ -28,15 +28,28 @@ export function withAlpha(rgba: number, a: number): number {
   return ((rgba & 0xffffff00) | (a & 0xff)) >>> 0;
 }
 
+const RGB_FUNCTION = /^\s*rgba?\(\s*([\d.]+%?)\s*[, ]\s*([\d.]+%?)\s*[, ]\s*([\d.]+%?)\s*(?:[,/]\s*([\d.]+%?)\s*)?\)\s*$/i;
+
+function clampByte(v: number): number {
+  return Number.isFinite(v) ? Math.max(0, Math.min(255, Math.round(v))) : 0;
+}
+
 /**
- * Resolves a `ColorInput` into packed `0xRRGGBBAA`. Numbers are taken as-is;
- * strings must be CSS hex (`#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`).
- * Invalid input resolves to `fallback`.
+ * Resolves a `ColorInput` into packed `0xRRGGBBAA`. Numbers are taken as-is
+ * (note: 8 hex digits, alpha last — `0xff8800ff`, not `0xff8800`); strings
+ * may be CSS hex (`#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`) or `rgb()` /
+ * `rgba()`. Invalid input resolves to `fallback`.
  */
 export function parseColor(input: ColorInput | undefined, fallback: number): number {
   if (input === undefined) return fallback >>> 0;
   if (typeof input === 'number') {
     return Number.isFinite(input) ? input >>> 0 : fallback >>> 0;
+  }
+  const css = RGB_FUNCTION.exec(input);
+  if (css) {
+    const channel = (v: string) => clampByte(v.endsWith('%') ? (parseFloat(v) / 100) * 255 : parseFloat(v));
+    const a = css[4] === undefined ? 255 : clampByte((css[4].endsWith('%') ? parseFloat(css[4]) / 100 : parseFloat(css[4])) * 255);
+    return packRGBA(channel(css[1]), channel(css[2]), channel(css[3]), a);
   }
   const s = input.charCodeAt(0) === 35 /* # */ ? input.slice(1) : input;
   if (!/^[0-9a-fA-F]+$/.test(s)) return fallback >>> 0;

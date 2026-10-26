@@ -33,6 +33,7 @@ export type { PhysicsSimulatorDeps, ResolvedPhysicsOptions } from './physics/Phy
 export {
   CenterForce,
   CollideForce,
+  ContainForce,
   LinkForce,
   ManyBodyForce,
   RadialForce,
@@ -41,10 +42,19 @@ export {
 export type {
   CenterForceOptions,
   CollideForceOptions,
+  ContainForceOptions,
   LinkForceOptions,
   ManyBodyForceOptions,
   RadialForceOptions,
 } from './physics/forces/index.js';
+
+// One-call view on @omernach/o3d
+export { createGraphView } from './view/createGraphView.js';
+export type { FocusOptions, GraphView, GraphViewOptions, O3DModule, ViewInsets } from './view/createGraphView.js';
+
+// Camera
+export { CameraRig } from './camera/CameraRig.js';
+export type { CameraRigCamera, CameraRigOptions, Vec3 } from './camera/CameraRig.js';
 
 // Labels
 export { LabelLayer } from './labels/LabelLayer.js';

@@ -19,6 +19,7 @@
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
     "skipLibCheck": true,
+    "types": ["@webgpu/types"],
     "forceConsistentCasingInFileNames": true
   },
   "include": ["src"],

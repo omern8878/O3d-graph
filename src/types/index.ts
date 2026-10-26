@@ -22,8 +22,9 @@ export type EdgeId = string | number;
 
 /**
  * Accepted color inputs:
- *  - `number`: packed `0xRRGGBBAA`
- *  - `string`: CSS hex `#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`
+ *  - `number`: packed `0xRRGGBBAA` — 8 hex digits, alpha last (`0xff8800ff`)
+ *  - `string`: CSS hex `#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`, or
+ *    `rgb(r, g, b)` / `rgba(r, g, b, a)`
  */
 export type ColorInput = number | string;
 

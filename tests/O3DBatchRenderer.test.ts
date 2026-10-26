@@ -1,78 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { O3DBatchRenderer, O3DGraph, encodeColorLayout, packRGBA } from '../src/index.js';
 import { FakeCanvas, cameraRay, createManualScheduler, project } from './helpers/mockEngine.js';
-
-/**
- * Fakes mirroring @omernach/o3d's InstancedMesh / LineBatch / CameraController
- * semantics: fixed capacity, views over a shared WebAssembly.Memory that
- * re-bind after growth, inclusive dirty ranges, red-in-low-byte colors.
- */
-const memory = new WebAssembly.Memory({ initial: 1, maximum: 16384 });
-let top = 64;
-function alloc(bytes: number): number {
-  const p = top;
-  top += (bytes + 15) & ~15;
-  const pages = Math.ceil(top / 65536) - memory.buffer.byteLength / 65536;
-  if (pages > 0) memory.grow(pages);
-  return p;
-}
-
-const log = { dirty: [] as string[], destroyed: 0 };
-
-class FakeInstancedMesh {
-  readonly capacity: number;
-  private count = 0;
-  private readonly t: number;
-  private readonly c: number;
-  constructor(_device: unknown, readonly mesh: { boundingRadius: number }, capacity: number) {
-    this.capacity = capacity;
-    this.t = alloc(capacity * 16);
-    this.c = alloc(capacity * 4);
-    const t = this.getTransforms();
-    for (let i = 0; i < capacity; i++) t[i * 4 + 3] = 1;
-  }
-  getCount() { return this.count; }
-  setCount(n: number) { return (this.count = Math.min(Math.max(0, n), this.capacity)); }
-  getTransforms() { return new Float32Array(memory.buffer, this.t, this.capacity * 4); }
-  getColors() { return new Uint32Array(memory.buffer, this.c, this.capacity); }
-  markDirty(first: number, last = first, channels: readonly string[] = ['transform', 'rotation', 'color']) {
-    log.dirty.push(`mesh ${first}..${last} ${channels.join('+')}`);
-  }
-  raycastNdc(_camera: unknown, nx: number, ny: number) {
-    const s = this.getTransforms();
-    const [ox, oy, oz, dx, dy, dz] = cameraRay(nx, ny);
-    let best = -1, bestT = Infinity;
-    for (let i = 0; i < this.count; i++) {
-      const r = Math.abs(s[i * 4 + 3]) * this.mesh.boundingRadius;
-      const lx = s[i * 4] - ox, ly = s[i * 4 + 1] - oy, lz = s[i * 4 + 2] - oz;
-      const tc = lx * dx + ly * dy + lz * dz;
-      const d2 = lx * lx + ly * ly + lz * lz - tc * tc;
-      if (r <= 0 || d2 > r * r) continue;
-      const t = tc - Math.sqrt(r * r - d2);
-      if (t > 0 && t < bestT) { bestT = t; best = i; }
-    }
-    return best;
-  }
-  destroy() { log.destroyed++; }
-}
-
-class FakeLineBatch {
-  readonly capacity: number;
-  private count = 0;
-  private readonly v: number;
-  private readonly c: number;
-  constructor(_device: unknown, capacity: number) {
-    this.capacity = capacity;
-    this.v = alloc(capacity * 24);
-    this.c = alloc(capacity * 8);
-  }
-  getCount() { return this.count; }
-  setCount(n: number) { return (this.count = Math.min(Math.max(0, n), this.capacity)); }
-  getVertices() { return new Float32Array(memory.buffer, this.v, this.capacity * 6); }
-  getColors() { return new Uint32Array(memory.buffer, this.c, this.capacity * 2); }
-  markDirty(first: number, last = first) { log.dirty.push(`lines ${first}..${last}`); }
-  destroy() { log.destroyed++; }
-}
+import { FakeInstancedMesh, FakeLineBatch, fakeLog as log } from './helpers/fakeO3D.js';
 
 function fakeCamera() {
   const calls: string[] = [];

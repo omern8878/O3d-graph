@@ -112,6 +112,8 @@ type Handler = (e: unknown) => void;
 export class FakeCanvas {
   readonly handlers: Record<string, Handler[]> = {};
   readonly style = { cursor: '' };
+  readonly clientWidth = 800;
+  readonly clientHeight = 800;
   private readonly captured = new Set<number>();
 
   addEventListener(type: string, fn: Handler): void {

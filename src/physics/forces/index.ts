@@ -2,12 +2,14 @@ import type { IForce, PhysicsOptions } from '../../types/index.js';
 import { resolvePhysicsOptions } from '../PhysicsSimulator.js';
 import { CenterForce, RadialForce } from './CenterForce.js';
 import { CollideForce } from './CollideForce.js';
+import { ContainForce } from './ContainForce.js';
 import { LinkForce } from './LinkForce.js';
 import { ManyBodyForce } from './ManyBodyForce.js';
 
-export { CenterForce, RadialForce, CollideForce, LinkForce, ManyBodyForce };
+export { CenterForce, RadialForce, CollideForce, ContainForce, LinkForce, ManyBodyForce };
 export type { CenterForceOptions, RadialForceOptions } from './CenterForce.js';
 export type { CollideForceOptions } from './CollideForce.js';
+export type { ContainForceOptions } from './ContainForce.js';
 export type { LinkForceOptions } from './LinkForce.js';
 export type { ManyBodyForceOptions } from './ManyBodyForce.js';
 

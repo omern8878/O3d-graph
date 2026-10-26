@@ -269,12 +269,15 @@ export class GraphStore<TNodeMeta = unknown, TEdgeMeta = unknown>
   /**
    * Replaces the whole graph. Capacity is reserved once up front, so loading
    * N nodes / E edges performs at most one reallocation per buffer.
-   * Throws on duplicate IDs or dangling edge endpoints (state is then partial).
+   *
+   * Atomic: the data is validated first (missing / duplicate IDs, edges to
+   * unknown nodes) and the current graph is left untouched if it's invalid.
    */
   setData(data: GraphData<TNodeMeta, TEdgeMeta>): void {
-    this.clear();
     const nodes = data.nodes;
     const edges = data.edges ?? [];
+    validateGraphData(nodes, edges);
+    this.clear();
     this.reserve(nodes.length, edges.length);
     for (let i = 0; i < nodes.length; i++) this.insertNode(nodes[i]);
     for (let i = 0; i < edges.length; i++) this.insertEdge(edges[i]);
@@ -972,6 +975,26 @@ export class GraphStore<TNodeMeta = unknown, TEdgeMeta = unknown>
   private assertEdgeIndex(index: number): void {
     if (!(index >= 0 && index < this._edgeCount)) {
       throw new RangeError(`GraphStore: edge index ${index} out of range [0, ${this._edgeCount})`);
+    }
+  }
+}
+
+function validateGraphData(nodes: ReadonlyArray<NodeInput<unknown>>, edges: ReadonlyArray<EdgeInput<unknown>>): void {
+  const nodeIds = new Set<NodeId>();
+  for (let i = 0; i < nodes.length; i++) {
+    const id = nodes[i]?.id;
+    if (id === undefined || id === null) throw new TypeError(`GraphStore.setData: nodes[${i}] has no id`);
+    if (nodeIds.has(id)) throw new Error(`GraphStore.setData: duplicate node id "${String(id)}" (nodes[${i}])`);
+    nodeIds.add(id);
+  }
+  const edgeIds = new Set<EdgeId>();
+  for (let i = 0; i < edges.length; i++) {
+    const e = edges[i];
+    if (!nodeIds.has(e.source)) throw new Error(`GraphStore.setData: edges[${i}] source "${String(e.source)}" is not a node`);
+    if (!nodeIds.has(e.target)) throw new Error(`GraphStore.setData: edges[${i}] target "${String(e.target)}" is not a node`);
+    if (e.id !== undefined) {
+      if (edgeIds.has(e.id)) throw new Error(`GraphStore.setData: duplicate edge id "${String(e.id)}" (edges[${i}])`);
+      edgeIds.add(e.id);
     }
   }
 }

@@ -158,6 +158,8 @@ export class O3DGraph<TNodeMeta = unknown, TEdgeMeta = unknown> {
             requestFrame: this.requestFrame,
           });
 
+    // Nothing to simulate until data arrives (setData / addNode reheat it).
+    if (this.store.nodeCount === 0) this.physics.stop();
     if (options.autoStart ?? true) this.start();
   }
 
